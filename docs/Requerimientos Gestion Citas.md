@@ -1,6 +1,6 @@
 # **Gestión de citas médicas - Requerimientos -> Selene Belalcázar Muñoz**
 
-## **El sistema ya cuenta con lo siguiente, pero se debe de adecuar de forma digital:** 
+## **El sistema antiguo cuenta con lo siguiente, pero el sistema actual también debe de:** 
 
 - Los pacientes llaman para agendar citas.
 - Se verifica la disponibilidad de los médicos según su especialidad.
@@ -8,7 +8,7 @@
 - Se ofrece la cita al paciente según los cupos, además el paciente elige que día y se registra en una agenda física.
 - Dos días antes, se llama al paciente para confirmar la cita recordando el día y la hora.
 
-## **Problemas identificados que presenta el sistema:** 
+## **Problemas identificados que presentaba el sistema antiguo para tomar encuenta en el actual:** 
 
 - Dificultad para manejar la disponibilidad de los médicos con agendas físicas.
 - Problemas para actualizar los cambios en la disponibilidad de los médicos.
