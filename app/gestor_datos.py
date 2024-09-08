@@ -1,6 +1,5 @@
-# gestor_datos.py
 from app.persona import Paciente
-from app.medico import Medico  # Corrige esta importación
+from app.medico import Medico  
 
 class GestorDeDatos:
     _instancia = None

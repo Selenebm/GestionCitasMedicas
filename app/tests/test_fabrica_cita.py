@@ -2,10 +2,9 @@ import sys
 import os
 import unittest
 from app.fabrica_cita import FabricaCita
-from app.persona import Paciente  # Ajuste en la ruta de importación
-from app.medico import Medico      # Ajuste en la ruta de importación
+from app.persona import Paciente  
+from app.medico import Medico      
 
-# Asegurarse de que el directorio correcto esté en el sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class TestFabricaCita(unittest.TestCase):

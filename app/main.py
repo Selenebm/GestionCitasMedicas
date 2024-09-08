@@ -1,7 +1,6 @@
-# main.py
 from gestor_datos import GestorDeDatos
 from persona import Paciente
-from medico import Medico  # Importa correctamente desde medico.py
+from medico import Medico  
 from agenda import Agenda
 from notificacion import Notificacion
 from fabrica_cita import FabricaCita

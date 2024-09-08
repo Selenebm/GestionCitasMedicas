@@ -22,4 +22,4 @@ class TestPaciente(unittest.TestCase):
 
     def test_actualizar_cita(self):
         self.paciente.actualizar_cita(self.cita_test)
-        # No debería lanzar ninguna excepción.
+       
