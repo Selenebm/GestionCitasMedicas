@@ -1,6 +1,4 @@
 from cita import Cita
-from fabrica_cita import FabricaCita
-
 class Agenda:
     def __init__(self, id_agenda: int, medico):
         self.id_agenda = id_agenda
@@ -17,5 +15,4 @@ class Agenda:
         return self.medico.horarios_disponibles
 
     def fabricar_cita(self, medico, paciente, fecha, hora):
-        fabrica = FabricaCita()
-        return fabrica.crear_cita(medico, paciente, fecha, hora)
+        return Cita.crear_cita(medico, paciente, fecha, hora)

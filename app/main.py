@@ -3,7 +3,8 @@ from persona import Paciente
 from medico import Medico  
 from agenda import Agenda
 from notificacion import Notificacion
-from fabrica_cita import FabricaCita
+from cita import Cita
+
 
 def main():
     gestor = GestorDeDatos.get_instancia()
@@ -16,16 +17,15 @@ def main():
     paciente1 = Paciente("Juan Pérez", 1, "555-555", "juan@example.com", medico1)
     gestor.agregar_paciente(paciente1)
 
-    # Crear cita a través de la fábrica de citas
-    fabrica_cita = FabricaCita()
-    cita = fabrica_cita.crear_cita(medico1, paciente1, "2024-09-15", "10:00")
+    # Crear cita directamente con el método en Cita
+    cita = Cita.crear_cita(medico1, paciente1, "2024-09-15", "10:00")
 
     # Agendar cita
     agenda = Agenda(1, medico1)
     agenda.agregar_cita(cita)
 
     # Confirmar cita
-    cita.confirmar_cita()
+    #cita.confirmar_cita()
 
     # Crear notificación y agregar observadores
     notificacion = Notificacion(1, "Recordatorio", "Recuerde su cita en 2 días.")

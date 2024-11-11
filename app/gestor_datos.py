@@ -1,5 +1,5 @@
-from app.persona import Paciente
-from app.medico import Medico  
+from persona import Paciente
+from medico import Medico  
 
 class GestorDeDatos:
     _instancia = None

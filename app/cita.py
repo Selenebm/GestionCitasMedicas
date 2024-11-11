@@ -8,3 +8,6 @@ class Cita:
         self.estado = estado
         self.asistio = False
 
+    @staticmethod
+    def crear_cita(medico, paciente, fecha, hora):
+        return Cita(None, medico, paciente, fecha, hora, 'Pendiente')

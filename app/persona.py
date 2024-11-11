@@ -1,4 +1,4 @@
-from app.observador import Observador
+from observador import Observador
 
 class Persona:
     def __init__(self, nombre: str, telefono: str, email: str):
