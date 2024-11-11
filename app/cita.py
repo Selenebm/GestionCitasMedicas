@@ -10,4 +10,6 @@ class Cita:
 
     @staticmethod
     def crear_cita(medico, paciente, fecha, hora):
+        # Método adicional para crear una cita
         return Cita(None, medico, paciente, fecha, hora, 'Pendiente')
+
