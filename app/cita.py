@@ -1,4 +1,6 @@
 class Cita:
+    _id_counter = 1  # Contador para IDs únicos
+
     def __init__(self, id_cita: int, medico, paciente, fecha: str, hora: str, estado: str):
         self.id_cita = id_cita
         self.medico = medico
@@ -8,8 +10,11 @@ class Cita:
         self.estado = estado
         self.asistio = False
 
-    @staticmethod
-    def crear_cita(medico, paciente, fecha, hora):
-        # Método adicional para crear una cita
-        return Cita(None, medico, paciente, fecha, hora, 'Pendiente')
+    @classmethod
+    def crear_cita(cls, medico, paciente, fecha, hora):
+        # Asigna automáticamente un id_cita usando el contador de clase
+        cita = cls(cls._id_counter, medico, paciente, fecha, hora, 'Pendiente')
+        cls._id_counter += 1  # Incrementa el contador para el siguiente id
+        return cita
+
 

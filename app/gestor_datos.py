@@ -1,4 +1,4 @@
-from persona import Paciente
+from paciente import Paciente
 from medico import Medico  
 
 class GestorDeDatos:

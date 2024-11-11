@@ -1,9 +1,9 @@
 from gestor_datos import GestorDeDatos
-from persona import Paciente
 from medico import Medico  
 from agenda import Agenda
 from notificacion import Notificacion
-from cita import Cita
+from cita import Cita   
+from paciente import Paciente
 
 
 def main():
