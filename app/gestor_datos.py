@@ -28,6 +28,25 @@ class GestorDeDatos:
                 return paciente
         return None
 
+    def actualizar_paciente(self, id_paciente: int, nuevos_datos: dict):
+        """
+        Actualiza la información de un paciente existente.
+        :param id_paciente: ID del paciente a actualizar.
+        :param nuevos_datos: Diccionario con los atributos a actualizar.
+        """
+        paciente = self.buscar_paciente_por_id(id_paciente)
+        if paciente is None:
+            print("Paciente no encontrado.")
+            return False
+        
+        # Actualizar cada atributo en el objeto paciente usando los datos del diccionario.
+        for atributo, valor in nuevos_datos.items():
+            if hasattr(paciente, atributo):
+                setattr(paciente, atributo, valor)
+        
+        print(f"Paciente con ID {id_paciente} actualizado exitosamente.")
+        return True
+
     def agregar_medico(self, medico: Medico):
         self.medicos.append(medico)
 
