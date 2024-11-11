@@ -7,6 +7,3 @@ class Medico:
 
     def actualizar_disponibilidad(self, nuevo_horario):
         self.horarios_disponibles = nuevo_horario
-
-    def actualizar_cita(self, cita):
-        print(f"El médico {self.nombre} ha actualizado la cita: {cita.id_cita}")
