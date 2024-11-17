@@ -1,9 +1,9 @@
 -- Crear tabla Medicos
 CREATE TABLE IF NOT EXISTS Medicos (
-    id_medico SERIAL PRIMARY KEY,
+    id_medico INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     especialidad TEXT NOT NULL,
-    horarios_disponibles JSONB NOT NULL
+    horarios_disponibles TEXT[] NOT NULL
 );
 
 -- Crear tabla Pacientes
