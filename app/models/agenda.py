@@ -1,4 +1,4 @@
-from cita import Cita
+from app.models.cita import Cita
 
 class Agenda:
     def __init__(self, id_agenda: int, medico):

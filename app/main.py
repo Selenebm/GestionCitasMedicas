@@ -1,57 +1,103 @@
-from gestor_datos import GestorDeDatos
-from medico import Medico  
-from agenda import Agenda
-from notificacion import Notificacion
-from cita import Cita   
-from paciente import Paciente
+from flask import Flask, request, jsonify, make_response
+from flask_sqlalchemy import SQLAlchemy
+from app import config
+from models.medico import Medico
+from models.paciente import Paciente
+from models.cita import Cita
+from models.notificacion import Notificacion
+from os import environ, error
 
-def main():
-    gestor = GestorDeDatos.get_instancia()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL')
+db = SQLAlchemy(app)
 
-    # Crear y agregar médicos
-    medico1 = Medico("Dr. House", 1, "Cardiología", ["10:00", "11:00", "12:00"])
-    medico2 = Medico("Dra. Martínez", 2, "Pediatría", ["14:00", "15:00", "16:00"])
-    medico3 = Medico("Dr. López", 3, "Dermatología", ["10:00", "11:30", "13:00"])
-    medico4 = Medico("Dra. Gómez", 4, "Neurología", ["08:00", "09:00", "10:30"])
-    medico5 = Medico("Dr. Ramírez", 5, "Ginecología", ["13:00", "14:30", "16:00"])
-    medico6 = Medico("Dra. Sánchez", 6, "Cardiología", ["12:00", "13:00", "14:00"])
-    medico7 = Medico("Dr. Fernández", 7, "Psiquiatría", ["09:30", "11:00", "12:30"])
-    medico8 = Medico("Dra. Rivera", 8, "Oncología", ["10:00", "11:00", "12:00"])
-    medico9 = Medico("Dr. Torres", 9, "Oftalmología", ["15:00", "16:00", "17:00"])
-    medico10 = Medico("Dra. Delgado", 10, "Endocrinología", ["09:00", "10:30", "12:00"])
 
-    # Agregar médicos al gestor de datos
-    gestor.agregar_medico(medico1)
-    gestor.agregar_medico(medico2)
-    gestor.agregar_medico(medico3)
-    gestor.agregar_medico(medico4)
-    gestor.agregar_medico(medico5)
-    gestor.agregar_medico(medico6)
-    gestor.agregar_medico(medico7)
-    gestor.agregar_medico(medico8)
-    gestor.agregar_medico(medico9)
-    gestor.agregar_medico(medico10)
+@app.route('/')
+def test():
+    return make_response(jsonify({'message': 'test route'}), 200)
 
-    # Crear y agregar pacientes
-    paciente1 = Paciente("Juan Pérez", 1, "555-555", "juan@example.com", medico1)
-    gestor.agregar_paciente(paciente1)
 
-    # Crear cita directamente con el método en Cita
-    cita = Cita.crear_cita(medico1, paciente1, "2024-09-15", "10:00")
+# Crear Medico
+@app.route('/crear_medico', methods=['POST'])
+def crear_medico():
+    try:
+        data = request.get_json()
+        nuevo_medico = Medico(
+            nombre=data['nombre'],
+            especialidad=data['especialidad'],
+            horarios_disponibles=data['horarios_disponibles'])
 
-    # Agendar cita
-    agenda = Agenda(1, medico1)
-    agenda.agregar_cita(cita)
+        db.session.add(nuevo_medico)
+        db.session.commit()
 
-    # Confirmar cita
-    #cita.confirmar_cita()
+        return make_response(jsonify({'message': 'Medico creado'}), 201)
+    except error:
+        return make_response(jsonify({'message': 'Error al crear el medico'}),
+                            500)
 
-    # Crear notificación y agregar observadores
-    notificacion = Notificacion(1, "Recordatorio", "Recuerde su cita en 2 días.")
-    notificacion.suscribir_observador(paciente1)
 
-    # Enviar notificación
-    notificacion.enviar_notificacion(cita)
+# Traer a todos los medicos
+@app.route('/medicos', methods=['GET'])
+def get_medicos():
+    try:
+        medicos = Medico.query.all()  # Nos permite traer todos los usuarios
+        return make_response(
+            jsonify({
+                'message': 'Medicos encontrados',
+                'medicos': [medico.json() for medico in medicos]
+            }), 200)
+    except error:
+        return make_response(
+            jsonify({'message': 'Error al traer los medicos'}), 500)
+
+
+# Traer a un medico por id
+@app.route('/medicos/<int:medico_id>', methods=['GET'])
+def get_medico(medico_id):
+    try:
+        medico = Medico.query.filter_by(medico_id=medico_id).first()
+        if medico:
+            return make_response(jsonify({'Medico': medico.json()}), 200)
+        else:
+            return make_response(jsonify({'message': 'Medico no encontrado'}),
+                                404)
+    except error as e:
+        return make_response(jsonify({'message': 'Error al traer al medico'}),500)
+
+
+# Actualizar datos de un medico por id
+@app.route('/medicos/<int:medico_id>', methods=['PUT'])
+def actualizar_medico(medico_id):
+    try:
+        data = request.get_json()
+        if data:
+            medico = Medico.query.filter_by(medico_id=medico_id).first()
+            medico.nombre = data['nombre']
+            medico.especialidad = data['especialidad']
+            medico.horarios_disponibles = data['horarios_disponibles']
+            db.session.commit()
+            return make_response(jsonify({'message': 'Medico actualizado'}),
+                                200)
+        return make_response(jsonify({'message': 'Medico no encontrado'}), 404)
+    except error:
+        return make_response(
+            jsonify({'message': 'Error al traer los medicos'}), 500)
+
+
+# Eliminar un medico por id
+@app.route('/medicos/<int:medico>id', methods=['DELETE'])
+def eliminar_medico(medico_id):
+    try:
+        medico = Medico.query.filter_by(medico_id=medico_id).first()
+        if medico:
+            db.session.delete(medico)
+            db.session.commit()
+            return make_response(jsonify({'message': 'Medico eliminado'}), 200)
+        return make_response(jsonify({'message': 'Medico no encontrado'}), 404)
+    except error:
+        return make_response(
+            jsonify({'message': 'Error al traer los medicos'}), 500)
+
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", debug=True)
