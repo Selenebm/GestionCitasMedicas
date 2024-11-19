@@ -1,21 +1,28 @@
-from flask import Flask, request, jsonify, make_response
-from flask_sqlalchemy import SQLAlchemy
-from app import config
-from models.medico import Medico
-from models.paciente import Paciente
-from models.cita import Cita
-from models.notificacion import Notificacion
-from os import environ, error
+# from app import app
+from app.models import Medico, Paciente, Cita, Notificacion
+from app import db
+from app import create_app
+from flask import Flask, make_response, jsonify, request
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL')
-db = SQLAlchemy(app)
-
+app = create_app()
 
 @app.route('/')
 def test():
     return make_response(jsonify({'message': 'test route'}), 200)
 
+# Traer a todos los medicos
+@app.route('/medicos', methods=['GET'])
+def get_medicos():
+    try:
+        medicos = Medico.query.all()  # Nos permite traer todos los usuarios
+        return make_response(
+            jsonify({
+                'message': 'Medicos encontrados',
+                'medicos': [medico.json() for medico in medicos]
+            }), 200)
+    except Exception as e:
+        return make_response(
+            jsonify({'message': 'Exception al traer los medicos'}), 500)
 
 # Crear Medico
 @app.route('/crear_medico', methods=['POST'])
@@ -31,24 +38,8 @@ def crear_medico():
         db.session.commit()
 
         return make_response(jsonify({'message': 'Medico creado'}), 201)
-    except error:
-        return make_response(jsonify({'message': 'Error al crear el medico'}),
-                            500)
-
-
-# Traer a todos los medicos
-@app.route('/medicos', methods=['GET'])
-def get_medicos():
-    try:
-        medicos = Medico.query.all()  # Nos permite traer todos los usuarios
-        return make_response(
-            jsonify({
-                'message': 'Medicos encontrados',
-                'medicos': [medico.json() for medico in medicos]
-            }), 200)
-    except error:
-        return make_response(
-            jsonify({'message': 'Error al traer los medicos'}), 500)
+    except Exception as e:
+        return make_response(jsonify({'message': 'Exception al crear el medico'}),500)
 
 
 # Traer a un medico por id
@@ -59,10 +50,9 @@ def get_medico(medico_id):
         if medico:
             return make_response(jsonify({'Medico': medico.json()}), 200)
         else:
-            return make_response(jsonify({'message': 'Medico no encontrado'}),
-                                404)
-    except error as e:
-        return make_response(jsonify({'message': 'Error al traer al medico'}),500)
+            return make_response(jsonify({'message': 'Medico no encontrado'}),404)
+    except Exception as e:
+        return make_response(jsonify({'message': 'Exception al traer al medico'}),500)
 
 
 # Actualizar datos de un medico por id
@@ -76,12 +66,11 @@ def actualizar_medico(medico_id):
             medico.especialidad = data['especialidad']
             medico.horarios_disponibles = data['horarios_disponibles']
             db.session.commit()
-            return make_response(jsonify({'message': 'Medico actualizado'}),
-                                200)
+            return make_response(jsonify({'message': 'Medico actualizado'}),200)
         return make_response(jsonify({'message': 'Medico no encontrado'}), 404)
-    except error:
+    except Exception as e:
         return make_response(
-            jsonify({'message': 'Error al traer los medicos'}), 500)
+            jsonify({'message': 'Exception al traer los medicos'}), 500)
 
 
 # Eliminar un medico por id
@@ -94,10 +83,11 @@ def eliminar_medico(medico_id):
             db.session.commit()
             return make_response(jsonify({'message': 'Medico eliminado'}), 200)
         return make_response(jsonify({'message': 'Medico no encontrado'}), 404)
-    except error:
+    except Exception as e:
         return make_response(
-            jsonify({'message': 'Error al traer los medicos'}), 500)
-
+            jsonify({'message': 'Exception al traer los medicos'}), 500)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)
+
+

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de medicos</title>
+</head>
+<body>
+    <h1>Lista de medicos</h1>
+    <!-- Jinja para flask -->
+    <ol>
+    {% for medico in medicos %}
+        <li>{{ medico.nombre }} - {{ medico.apellido }}</li>
+    {% endfor %}
+    </ol>
+</body>
+</html>
