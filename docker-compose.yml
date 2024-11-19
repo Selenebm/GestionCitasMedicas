@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  database:
+    build: ./database
+    environment:
+      POSTGRES_DB: citas_medicas
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
