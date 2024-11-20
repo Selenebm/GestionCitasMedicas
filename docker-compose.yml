@@ -9,9 +9,21 @@ services:
       POSTGRES_PASSWORD: adminpass
     volumes:
       - pgdata:/var/lib/postgresql/data
+  api:
+    build: ./aplicacion_web/api
+    
+    ports:
+      - "8080:8080" # Esto mas adelante lo debe tener el proxy
+    
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpass@database/citas_medicas
+
+    # Le dice que arranque despues de la db
+    depends_on:
+      - database
 
   proxy:
-    build: ./proxi
+    build: ./proxy
     ports:
       - "80:80"  # Exponer el puerto 80 al host
     #depends_on:
