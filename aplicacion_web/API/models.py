@@ -5,7 +5,7 @@ db = SQLAlchemy()
 class Medico(db.Model):
     __tablename__ = 'medicos'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id_medico = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     especialidad = db.Column(db.String(100), nullable=False)
     horarios_disponibles = db.Column(db.ARRAY(db.String), nullable=False)  # List of available times
@@ -13,7 +13,7 @@ class Medico(db.Model):
 
     def json(self):
         return {
-            'id': self.id,
+            'id': self.id_medico,
             'nombre': self.nombre,
             'especialidad': self.especialidad,
             'horarios_disponibles': self.horarios_disponibles
@@ -22,39 +22,40 @@ class Medico(db.Model):
 class Paciente(db.Model):
     __tablename__ = 'pacientes'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id_paciente = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     telefono = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    doctor_preferido_id = db.Column(db.Integer, db.ForeignKey('medicos.id'), nullable=True)
-    doctor_preferido = db.relationship('Medico')
+    doctor_preferido = db.Column(db.Integer, db.ForeignKey('medicos.id_medico'), nullable=True)
+    #doctor_preferido = db.relationship('Medico')
     citas = db.relationship('Cita', back_populates='paciente')
 
     def json(self):
         return {
-            'id': self.id,
+            'id': self.id_paciente,
             'nombre': self.nombre,
             'telefono': self.telefono,
             'email': self.email,
-            'doctor_preferido_id': self.doctor_preferido_id
+            'doctor_preferido_id': self.doctor_preferido
         }
 
 class Cita(db.Model):
     __tablename__ = 'citas'
 
-    id = db.Column(db.Integer, primary_key=True)
-    fecha_hora = db.Column(db.DateTime, nullable=False)
-    motivo = db.Column(db.String(255), nullable=True)  # Reason for cancellation
+    id_cita = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    hora = db.Column(db.Time, nullable = False)
     estado = db.Column(db.String(50), default='programada')  # 'programada', 'cancelada', 'completada'
-    paciente_id = db.Column(db.Integer, db.ForeignKey('pacientes.id'), nullable=False)
-    medico_id = db.Column(db.Integer, db.ForeignKey('medicos.id'), nullable=False)
+    asistio = db.Column(db.Boolean, nullable=True)  # Reason for cancellation
+    id_paciente = db.Column(db.Integer, db.ForeignKey('pacientes.id_paciente'), nullable=False)
+    id_medico = db.Column(db.Integer, db.ForeignKey('medicos.id_medico'), nullable=False)
 
     paciente = db.relationship('Paciente', back_populates='citas')
     medico = db.relationship('Medico', back_populates='citas')
 
     def json(self):
         return {
-            'id': self.id,
+            'id': self.id_cita,
             'fecha_hora': self.fecha_hora.strftime('%Y-%m-%d %H:%M:%S'),
             'estado': self.estado,
             'motivo': self.motivo,
@@ -65,17 +66,18 @@ class Cita(db.Model):
 class Notificacion(db.Model):
     __tablename__ = 'notificaciones'
 
-    id = db.Column(db.Integer, primary_key=True)
-    cita_id = db.Column(db.Integer, db.ForeignKey('citas.id'), nullable=False)
+    id_notificacion = db.Column(db.Integer, primary_key=True)
+    id_cita = db.Column(db.Integer, db.ForeignKey('citas.id_cita'), nullable=False)
+    fecha_envio = db.Column(db.DateTime)
+    tipo_notificacion = db.Column(db.String(50))
     mensaje = db.Column(db.String(255), nullable=False)
-    enviado = db.Column(db.Boolean, default=False)
 
     cita = db.relationship('Cita')
 
     def json(self):
         return {
-            'id': self.id,
-            'cita_id': self.cita_id,
+            'id': self.id_notificacion,
+            'cita_id': self.id_cita,
             'mensaje': self.mensaje,
             'enviado': self.enviado
         }
