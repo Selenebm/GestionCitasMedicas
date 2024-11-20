@@ -254,14 +254,14 @@ def exportar_reporte():
         citas_canceladas = Cita.query.filter_by(estado='cancelada').all()
         data = [{'motivo': c.motivo, 'fecha': c.fecha_hora} for c in citas_canceladas]
     else:
-        return jsonify({'message': 'Tipo de reporte no válido'}), 400
+        return make_json_response({'message': 'Tipo de reporte no válido'}), 400
 
     # Create DataFrame
     df = pd.DataFrame(data)
     filename = f'reporte_{tipo}.xlsx'
     df.to_excel(filename, index=False)
 
-    return jsonify({'message': 'Reporte exportado', 'file': filename}), 200
+    return make_json_response({'message': 'Reporte exportado', 'file': filename}), 200
 
 
 if __name__ == "__main__":
