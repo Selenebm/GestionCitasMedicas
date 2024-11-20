@@ -21,54 +21,91 @@ def make_json_response(data, status=200):
     )
 
 # Toda la logica para reservar citas
-@app.route('/reservar_cita', methods=['POST'])
+@app.route('/citas/reservar_cita', methods=['POST'])
 def reservar_cita():
-    data = request.get_json()
-    paciente_id = data['paciente_id']
-    especialidad = data['especialidad']
-    fecha_hora = datetime.strptime(data['fecha_hora'], '%Y-%m-%d %H:%M:%S')
+    try:
+        data = request.get_json()
+        paciente_id = data['paciente_id']
+        especialidad = data['especialidad']
+        fecha_hora = data['fecha_hora']
 
-    # Valida que el paciente exista
-    paciente = Paciente.query.get(paciente_id)
-    if not paciente:
-        return jsonify({'message': 'Paciente no encontrado'})
+        # Valida que el paciente exista
+        paciente = Paciente.query.get(paciente_id)
+        if not paciente:
+            return jsonify({'message': 'Paciente no encontrado'}), 404
 
-    # filtra el doctor por especialidad
-    medicos = Medico.query.filter_by(especialidad=especialidad).all()
-    for medico in medicos:
-        if fecha_hora.strftime('%H:%M') in medico.horarios_disponibles:
-            # verifica que no se choquen los horarios
-            if not any(c.fecha_hora == fecha_hora for c in medico.citas):
-                # Agenda la cita
+        # Filtra los médicos por especialidad
+        medicos = Medico.query.filter_by(especialidad=especialidad).all()
+        for medico in medicos:
+            # Asegúrate de que horarios_disponibles sea una lista
+            if isinstance(medico.horarios_disponibles, list):
+                horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]  # Limpia comillas extra
+            else:
+                return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
+
+            # Verifica si el horario está disponible
+            if fecha_hora in horarios_disponibles:
                 cita = Cita(
-                    fecha_hora=fecha_hora,
-                    paciente_id=paciente_id,
-                    medico_id=medico.id
+                    fecha=fecha_hora[:9],
+                    hora=fecha_hora[11:],
+                    estado='Asignada',
+                    asistio=None,
+                    id_paciente=paciente_id,
+                    id_medico=medico.id_medico
                 )
+
                 db.session.add(cita)
                 db.session.commit()
-                return jsonify({'message': 'Cita reservada', 'cita': cita.json()})
+                return jsonify({'message': 'Cita reservada', 'cita': cita.json()}), 201
+            medico.horarios_disponibles.remove(f"'{fecha_hora}'")
 
-    return jsonify({'message': 'No hay médicos disponibles en este horario'})
+        return jsonify({'message': 'No hay médicos disponibles en este horario'}), 400
+
+    except Exception as e:
+        return jsonify({'message': 'Error al reservar cita', 'error': str(e)}), 500
+
+
 
 # Para cancelar citas
-@app.route('/cancelar_cita/<int:cita_id>', methods=['PUT'])
+@app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
 def cancelar_cita(cita_id):
-    data = request.get_json()
-    motivo = data.get('motivo')
+    try:
+        data = request.get_json()
+        asistio = data.get('asistio', False)  # Asegura un valor por defecto
 
-    cita = Cita.query.get(cita_id)
-    if not cita:
-        return jsonify({'message': 'Cita no encontrada'})
+        # Busca la cita
+        cita = Cita.query.get(cita_id)
+        if not cita:
+            return jsonify({'message': 'Cita no encontrada'}), 404
 
-    if cita.estado == 'cancelada':
-        return jsonify({'message': 'La cita ya está cancelada'})
+        if cita.estado == 'cancelada':
+            return jsonify({'message': 'La cita ya está cancelada'}), 409
 
-    cita.estado = 'cancelada'
-    cita.motivo = motivo
-    db.session.commit()
+        # Cancela la cita
+        cita.estado = 'cancelada'
+        cita.asistio = asistio
+        db.session.commit()
 
-    return jsonify({'message': 'Cita cancelada', 'cita': cita.json()})
+        return jsonify({'message': 'Cita cancelada', 'cita': cita.json()}), 200
+    except Exception as e:
+        return jsonify({'message': 'Error al cancelar cita', 'error': str(e)}), 500
+
+
+
+#Ver citas
+@app.route('/citas', methods=['GET'])
+def get_citas():
+    try:
+        citas = Cita.query.all()
+        return make_json_response({
+            'message': 'Citas encontrados',
+            'citas': [cita.json() for cita in citas]
+        })
+    except Exception as e:
+        return make_json_response({
+            'message': 'Error al buscar las citas',
+            'error': str(e)
+        }, status=500)
 
 # --------------------------------------------
 # CRUD Medicos
@@ -161,6 +198,8 @@ def eliminar_medico(medico_id):
         }, status=500)
 
 
+
+
 # --------------------------------------------
 # CRUD Pacientes
 # --------------------------------------------
@@ -246,24 +285,48 @@ def eliminar_paciente(paciente_id):
 
 
 # Exportar reportes a excel
+import os
+from flask import send_file, current_app
+
 @app.route('/reporte', methods=['GET'])
 def exportar_reporte():
     tipo = request.args.get('tipo')
+    
     if tipo == 'medicos_demandados':
         medicos = Medico.query.all()
         data = [{'medico': m.nombre, 'citas': len(m.citas)} for m in medicos]
     elif tipo == 'motivos_cancelacion':
-        citas_canceladas = Cita.query.filter_by(estado='cancelada').all()
-        data = [{'motivo': c.motivo, 'fecha': c.fecha_hora} for c in citas_canceladas]
+        citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
+        data = [{'medico': c.id_medico, 'paciente': c.id_paciente,'fecha': f"{c.fecha}/{c.hora}"} for c in citas_canceladas]
     else:
         return make_json_response({'message': 'Tipo de reporte no válido'}), 400
 
-    # Create DataFrame
+    # Crear DataFrame y archivo en una carpeta temporal
     df = pd.DataFrame(data)
+    output_dir = os.path.join(current_app.instance_path, 'reporte_temp')
+    os.makedirs(output_dir, exist_ok=True)  # Crea la carpeta si no existe
     filename = f'reporte_{tipo}.xlsx'
-    df.to_excel(filename, index=False)
+    filepath = os.path.join(output_dir, filename)
+    df.to_excel(filepath, index=False)
 
-    return make_json_response({'message': 'Reporte exportado', 'file': filename}), 200
+    # Servir el archivo al cliente
+    response = send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,  # Cambiado de attachment_filename a download_name
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+    # Eliminar el archivo después de enviarlo
+    @response.call_on_close
+    def remove_file():
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+    return response
+
+
+
 
 
 if __name__ == "__main__":
