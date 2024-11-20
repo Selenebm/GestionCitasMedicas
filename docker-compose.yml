@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   database:
-    build: ./database
+    build: ./aplicacion_web/database
     environment:
       POSTGRES_DB: citas_medicas
       POSTGRES_USER: admin
@@ -26,10 +26,8 @@ services:
     build: ./proxy
     ports:
       - "80:80"  # Exponer el puerto 80 al host
-    #depends_on:
-    #  - backend
-    #networks:
-    #  - app-network
+    depends_on:
+      - api
 
 volumes:
   pgdata:
