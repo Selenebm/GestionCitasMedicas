@@ -8,41 +8,29 @@ CREATE TABLE IF NOT EXISTS Medicos (
 
 -- Crear tabla Pacientes
 CREATE TABLE IF NOT EXISTS Pacientes (
-    id_paciente INTEGER PRIMARY KEY,
+    id_paciente SERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,
     telefono TEXT NOT NULL,
-    email TEXT NOT NULL,
-    doctor_preferido INTEGER DEFAULT NULL,
-    CONSTRAINT fk_doctor_preferido FOREIGN KEY (doctor_preferido) REFERENCES Medicos (id_medico)
+    email TEXT NOT NULL UNIQUE,
+    doctor_preferido INTEGER REFERENCES Medicos(id_medico)
 );
 
 -- Crear tabla Citas
 CREATE TABLE IF NOT EXISTS Citas (
     id_cita SERIAL PRIMARY KEY,
-    id_medico INTEGER,
-    id_paciente INTEGER,
+    id_medico INTEGER REFERENCES Medicos(id_medico),
+    id_paciente INTEGER REFERENCES Pacientes(id_paciente),
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     estado TEXT NOT NULL,
-    asistio BOOLEAN,
-    CONSTRAINT fk_medico FOREIGN KEY (id_medico) REFERENCES Medicos (id_medico),
-    CONSTRAINT fk_paciente FOREIGN KEY (id_paciente) REFERENCES Pacientes (id_paciente)
+    asistio BOOLEAN
 );
 
 -- Crear tabla Notificaciones
 CREATE TABLE IF NOT EXISTS Notificaciones (
     id_notificacion SERIAL PRIMARY KEY,
-    id_cita INTEGER,
+    id_cita INTEGER REFERENCES Citas(id_cita),
     tipo_notificacion TEXT NOT NULL,
     mensaje TEXT NOT NULL,
-    CONSTRAINT fk_cita FOREIGN KEY (id_cita) REFERENCES Citas (id_cita)
-);
-
--- Crear tabla Agenda
-CREATE TABLE IF NOT EXISTS Agenda (
-    id_agenda SERIAL PRIMARY KEY,
-    id_medico INTEGER,
-    id_cita INTEGER,
-    CONSTRAINT fk_medico FOREIGN KEY (id_medico) REFERENCES Medicos (id_medico),
-    CONSTRAINT fk_cita FOREIGN KEY (id_cita) REFERENCES Citas (id_cita)
+    fecha_envio DATE
 );

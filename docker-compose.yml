@@ -2,13 +2,26 @@ version: '3.8'
 
 services:
   database:
-    build: ./database
+    build: ./aplicacion_web/database
     environment:
       POSTGRES_DB: citas_medicas
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpass
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  webapp:
+    build: ./aplicacion_web/webapp
+    
+    ports:
+      - "8080:8080" # Esto mas adelante lo debe tener el proxy
+    
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpass@database/citas_medicas
+
+    # Le dice que arranque despues de la db
+    depends_on:
+      - database
 
 volumes:
   pgdata:
