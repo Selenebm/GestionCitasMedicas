@@ -93,7 +93,7 @@ def get_medicos():
 @app.route('/medicos/<int:medico_id>', methods=['GET'])
 def get_medico(medico_id):
     try:
-        medico = Medico.query.filter_by(medico_id=medico_id).first()
+        medico = Medico.query.filter_by(id_medico=medico_id).first()
         if medico:
             return make_json_response({'Medico': medico.json()})
         else:
@@ -109,6 +109,7 @@ def crear_medico():
     try:
         data = request.get_json()
         nuevo_medico = Medico(
+            id_medico=data['id_medico'],
             nombre=data['nombre'],
             especialidad=data['especialidad'],
             horarios_disponibles=data['horarios_disponibles']
@@ -127,7 +128,7 @@ def crear_medico():
 def actualizar_medico(medico_id):
     try:
         data = request.get_json()
-        medico = Medico.query.filter_by(medico_id=medico_id).first()
+        medico = Medico.query.filter_by(id_medico=medico_id).first()
         if medico:
             medico.nombre = data['nombre']
             medico.especialidad = data['especialidad']
@@ -146,7 +147,7 @@ def actualizar_medico(medico_id):
 @app.route('/medicos/<int:medico_id>', methods=['DELETE'])
 def eliminar_medico(medico_id):
     try:
-        medico = Medico.query.filter_by(medico_id=medico_id).first()
+        medico = Medico.query.filter_by(id_medico=medico_id).first()
         if medico:
             db.session.delete(medico)
             db.session.commit()
@@ -184,6 +185,7 @@ def crear_paciente():
     try:
         data = request.get_json()
         nuevo_paciente = Paciente(
+            id_paciente=data['id_paciente'],
             nombre=data['nombre'],
             telefono=data['telefono'],
             email=data['email'],
