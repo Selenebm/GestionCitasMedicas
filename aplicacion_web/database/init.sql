@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Medicos (
 
 -- Crear tabla Pacientes
 CREATE TABLE IF NOT EXISTS Pacientes (
-    id_paciente SERIAL PRIMARY KEY,
+    id_paciente INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     telefono TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Citas (
 CREATE TABLE IF NOT EXISTS Notificaciones (
     id_notificacion SERIAL PRIMARY KEY,
     id_cita INTEGER REFERENCES Citas(id_cita),
+    fecha_envio DATE, 
     tipo_notificacion TEXT NOT NULL,
-    mensaje TEXT NOT NULL,
-    fecha_envio DATE
+    mensaje TEXT NOT NULL
 );
