@@ -2,14 +2,13 @@ version: '3.8'
 
 services:
   database:
-    build: ./aplicacion_web/database
+    build: ./database
     environment:
       POSTGRES_DB: citas_medicas
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpass
     volumes:
       - pgdata:/var/lib/postgresql/data
-
   api:
     build: ./aplicacion_web/api
     
@@ -22,6 +21,15 @@ services:
     # Le dice que arranque despues de la db
     depends_on:
       - database
+
+  proxy:
+    build: ./proxy
+    ports:
+      - "80:80"  # Exponer el puerto 80 al host
+    #depends_on:
+    #  - backend
+    #networks:
+    #  - app-network
 
 volumes:
   pgdata:
