@@ -45,8 +45,8 @@ class Cita(db.Model):
     id_cita = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
     hora = db.Column(db.Time, nullable = False)
-    estado = db.Column(db.String(50), default='programada')  # 'programada', 'cancelada', 'completada'
-    asistio = db.Column(db.Boolean, nullable=True)  # Reason for cancellation
+    estado = db.Column(db.String(50), default='Asignada')  # 'Asignada', 'Cancelada', 'Movida'
+    asistio = db.Column(db.Boolean, nullable=True)  
     id_paciente = db.Column(db.Integer, db.ForeignKey('pacientes.id_paciente'), nullable=False)
     id_medico = db.Column(db.Integer, db.ForeignKey('medicos.id_medico'), nullable=False)
 
