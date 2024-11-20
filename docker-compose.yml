@@ -10,5 +10,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  proxy:
+    build: ./proxi
+    ports:
+      - "80:80"  # Exponer el puerto 80 al host
+    #depends_on:
+    #  - backend
+    #networks:
+    #  - app-network
+
 volumes:
   pgdata:
