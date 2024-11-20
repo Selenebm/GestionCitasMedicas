@@ -56,11 +56,12 @@ class Cita(db.Model):
     def json(self):
         return {
             'id': self.id_cita,
-            'fecha_hora': self.fecha_hora.strftime('%Y-%m-%d %H:%M:%S'),
+            'fecha': self.fecha.strftime('%Y-%m-%d'),
+            'hora': self.hora.strftime('%H:%M'),
             'estado': self.estado,
-            'motivo': self.motivo,
-            'paciente_id': self.paciente_id,
-            'medico_id': self.medico_id
+            'asisitio': self.asistio,
+            'paciente_id': self.id_paciente,
+            'medico_id': self.id_medico
         }
 
 class Notificacion(db.Model):
