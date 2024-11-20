@@ -10,8 +10,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  webapp:
-    build: ./aplicacion_web/webapp
+  api:
+    build: ./aplicacion_web/api
     
     ports:
       - "8080:8080" # Esto mas adelante lo debe tener el proxy
