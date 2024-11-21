@@ -71,15 +71,12 @@ def reservar_cita():
         # Filtra los médicos por especialidad
         medicos = Medico.query.filter_by(especialidad=especialidad).all()
         for medico in medicos:
-<<<<<<< HEAD
             if isinstance(medico.horarios_disponibles, list):
                 horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
             else:
                 return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
-=======
             # Limpia las comillas del horario en la lista de horarios disponibles
             horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
->>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 
             if fecha_hora in horarios_disponibles:
                 # Crear la cita
@@ -106,14 +103,8 @@ def reservar_cita():
     except Exception as e:
         return jsonify({'message': 'Error al reservar cita', 'error': str(e)}), 500
 
-<<<<<<< HEAD
-# Cancelar citas
-=======
-
-
 
 # Para cancelar citas
->>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 @app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
 def cancelar_cita(cita_id):
     try:
