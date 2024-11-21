@@ -14,22 +14,78 @@ app.secret_key = "secret_key"
 # Ruta de prueba
 @app.route('/')
 def test():
-    nuevo_paciente = Paciente(
-                id_paciente=1115309309,
-                nombre="Guadalupe Belalcazar",
-                telefono="3127167148",
-                email="guadalupe567@gmail.com",
-                doctor_preferido=1169964632
-            )
-    db.session.add(nuevo_paciente)
-    db.session.commit()
     return render_template("base.html")
 
 # Renderizado del frontend
-@app.route('/citas')
+# @app.route('/citas')
+# def citas():
+#     return render_template('citas.html', citas=citas)
+
+@app.route('/citas', methods=['GET', 'POST'])
 def citas():
+    if request.method == "POST":
+        try:
+            # Obtener datos del formulario
+            id_paciente = int(request.form.get('id_paciente'))
+            especialidad = request.form.get('especialidad')
+            fecha = request.form.get('fecha')
+            hora = request.form.get('hora')
+
+            # Validar existencia del paciente
+            paciente = Paciente.query.get(id_paciente)
+            if not paciente:
+                flash("Paciente no encontrado.", "danger")
+                return redirect('/citas')
+
+            # Buscar médicos con la especialidad indicada
+            medicos = Medico.query.filter_by(especialidad=especialidad).all()
+            if not medicos:
+                flash("No hay médicos disponibles para esta especialidad.", "danger")
+                return redirect('/citas')
+
+            # Asignar al primer médico con disponibilidad en el horario
+            for medico in medicos:
+                if isinstance(medico.horarios_disponibles, list):
+                    horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
+                else:
+                    flash("Formato inválido en los horarios del médico.", "danger")
+                    return redirect('/citas')
+
+                # Verificar si el horario está disponible
+                fecha_hora = f"{fecha} {hora}"
+                if fecha_hora in horarios_disponibles:
+                    # Crear una nueva cita
+                    nueva_cita = Cita(
+                        fecha=fecha,
+                        hora=hora,
+                        estado="Asignada",
+                        asistio=None,
+                        id_paciente=id_paciente,
+                        id_medico=medico.id_medico
+                    )
+                    db.session.add(nueva_cita)
+
+                    # Eliminar el horario de los horarios disponibles del médico
+                    horarios_disponibles.remove(fecha_hora)
+                    medico.horarios_disponibles = [f"'{h}'" for h in horarios_disponibles]
+
+                    # Guardar los cambios en la base de datos
+                    db.session.commit()
+                    flash("Cita reservada correctamente.", "success")
+                    return redirect('/citas')
+
+            flash("No hay médicos disponibles en este horario.", "danger")
+            return redirect('/citas')
+        except Exception as e:
+            # Manejo de errores
+            app.logger.error(f"Error inesperado al reservar cita: {e}")
+            db.session.rollback()
+            flash("Ocurrió un error al reservar la cita. Inténtalo nuevamente.", "danger")
+
+    # Obtener todas las citas para mostrarlas en la tabla
     citas = Cita.query.all()
     return render_template('citas.html', citas=citas)
+
 
 @app.route('/pacientes', methods=['GET', 'POST'])
 def pacientes():
@@ -75,34 +131,39 @@ def get_paciente(id_paciente):
     except Exception as e:
         return make_json_response({'message': 'Error al traer el pacientes', 'error': str(e)}, status=500)
 
-# @app.route('/pacientes/agregar', methods=['POST'])
-# def agregar_paciente():
-#     try:
-#         flash("Paciente creado exitosamente.", "success")
-#         return redirect(url_for('pacientes'))
-#     except Exception as e:
-#         # Log para depurar errores
-#         print(f"Error al guardar el paciente: {e}")
-#         flash(f"Error al crear el paciente: {str(e)}", "danger")
-#         return redirect(url_for('pacientes'))
 
-
-@app.route('/medicos')
+@app.route('/medicos', methods=['GET', 'POST'])
 def medicos():
+    if request.method == "POST":
+        try:
+            # Obtener datos del formulario
+            id_medico = int(request.form.get('id_medico'))
+            nombre = request.form.get('nombre')
+            especialidad = request.form.get('especialidad')
+            horarios_disponibles = request.form.get('horarios_disponibles')
+
+            # Crear una nueva instancia de Medico
+            nuevo_medico = Medico(
+                id_medico=id_medico,
+                nombre=nombre,
+                especialidad=especialidad,
+                horarios_disponibles=horarios_disponibles
+            )
+
+            # Agregar y guardar en la base de datos
+            db.session.add(nuevo_medico)
+            db.session.commit()
+            flash("Médico añadido correctamente.", "success")
+        except Exception as e:
+            # Manejo de errores
+            app.logger.error(f"Error inesperado al añadir médico: {e}")
+            db.session.rollback()
+            flash("Ocurrió un error. Inténtalo nuevamente.", "danger")
+
+    # Obtener la lista de médicos para mostrar en la tabla
     medicos = Medico.query.all()
-    return render_template("medicos.html", medicos=medicos)
+    return render_template('medicos.html', medicos=medicos)
 
-@app.route('/medicos', methods=['GET'])
-def get_medicos():
-
-    try:
-        medicos = Medico.query.all()
-        return make_json_response({
-            'message': 'Médicos encontrados',
-            'medicos': [medico.json() for medico in medicos]
-        })
-    except Exception as e:
-        return make_json_response({'message': 'Error al acceder a la base de datos', 'error': str(e)}, status=500)
 
 
 @app.route('/reporte')

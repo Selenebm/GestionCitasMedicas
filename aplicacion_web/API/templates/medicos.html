@@ -1,9 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}Médico{% endblock %}
+{% block title %}Médicos{% endblock %}
 
 {% block content %}
-<h2 class="text-center text-primary">Medicos</h2>
+<h2 class="text-center text-primary">Gestión de Médicos</h2>
+
+<!-- Formulario -->
+<div class="card my-4">
+    <div class="card-body">
+        <h5 class="card-title">Añadir o Editar Médico</h5>
+        <form id="form-medico" method="POST" action="/medicos">
+            <div class="mb-3">
+                <label for="id_medico" class="form-label">ID Médico:</label>
+                <input type="text" id="id_medico" name="id_medico" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="especialidad" class="form-label">Especialidad:</label>
+                <input type="text" id="especialidad" name="especialidad" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="horarios_disponibles" class="form-label">Horarios Disponibles:</label>
+                <input type="text" id="horarios_disponibles" name="horarios_disponibles" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla -->
 <table class="table table-bordered mt-4">
     <thead class="bg-primary text-white">
         <tr>
@@ -19,10 +47,11 @@
             <td>{{ medico.id_medico }}</td>
             <td>{{ medico.nombre }}</td>
             <td>{{ medico.especialidad }}</td>
-            <td>{{ medico.horarios_disponibles }}
+            <td>{{ medico.horarios_disponibles }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% endblock %}
+
 

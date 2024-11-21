@@ -1,9 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}Citas{% endblock %}
+{% block title %}Gestión de Citas{% endblock %}
 
 {% block content %}
-<h2 class="text-center text-primary">Citas</h2>
+<h2 class="text-center text-primary">Gestión de Citas</h2>
+
+<!-- Formulario -->
+<div class="card my-4">
+    <div class="card-body">
+        <h5 class="card-title">Reservar Cita</h5>
+        <form id="form-cita" method="POST" action="/citas">
+            <div class="mb-3">
+                <label for="id_paciente" class="form-label">ID Paciente:</label>
+                <input type="number" id="id_paciente" name="id_paciente" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="especialidad" class="form-label">Especialidad:</label>
+                <input type="text" id="especialidad" name="especialidad" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="hora" class="form-label">Hora:</label>
+                <input type="time" id="hora" name="hora" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Reservar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla -->
 <table class="table table-bordered mt-4">
     <thead class="bg-primary text-white">
         <tr>
@@ -12,11 +40,11 @@
             <th>Hora</th>
             <th>Paciente</th>
             <th>Médico</th>
+            <th>Especialidad</th>
             <th>Estado</th>
-            <th>Asistio</th>
+            <th>Asistió</th>
         </tr>
     </thead>
-    
     <tbody>
         {% for cita in citas %}
         <tr>
@@ -25,6 +53,7 @@
             <td>{{ cita.hora }}</td>
             <td>{{ cita.id_paciente }}</td>
             <td>{{ cita.id_medico }}</td>
+            <td>{{ cita.medico.especialidad if cita.medico else 'N/A' }}</td>
             <td>{{ cita.estado }}</td>
             <td>{{ cita.asistio }}</td>
         </tr>
