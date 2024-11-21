@@ -75,6 +75,13 @@ def reservar_cita():
         # Filtra los médicos por especialidad
         medicos = Medico.query.filter_by(especialidad=especialidad).all()
         for medico in medicos:
+<<<<<<< HEAD
+=======
+            if isinstance(medico.horarios_disponibles, list):
+                horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
+            else:
+                return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
+>>>>>>> d0ca59ea57aacb1af1d5750e833f99b404bd903f
             # Limpia las comillas del horario en la lista de horarios disponibles
             horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
 
