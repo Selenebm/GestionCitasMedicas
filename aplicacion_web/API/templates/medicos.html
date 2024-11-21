@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Médicos</title>
+    <!-- Vincula el archivo CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+</head>
+<body>
+    <h1>Lista de Médicos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Horarios Disponibles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medico in medicos %}
+            <tr>
+                <td>{{ medico.id_medico }}</td>
+                <td>{{ medico.nombre }}</td>
+                <td>{{ medico.especialidad }}</td>
+                <td>{{ medico.horarios_disponibles }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No se encontraron médicos.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

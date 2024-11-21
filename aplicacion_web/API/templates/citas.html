@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Citas{% endblock %}
+
+{% block content %}
+<h2 class="text-center text-primary">Citas</h2>
+<table class="table table-bordered mt-4">
+    <thead class="bg-primary text-white">
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cita in citas %}
+        <tr>
+            <td>{{ cita.id }}</td>
+            <td>{{ cita.fecha }}</td>
+            <td>{{ cita.hora }}</td>
+            <td>{{ cita.paciente }}</td>
+            <td>{{ cita.medico }}</td>
+            <td>{{ cita.estado }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
