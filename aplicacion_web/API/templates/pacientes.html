@@ -9,7 +9,11 @@
 <div class="card my-4">
     <div class="card-body">
         <h5 class="card-title">Añadir o Editar Paciente</h5>
-        <form id="form-paciente" method="POST" action="/pacientes/agregar">
+        <form id="form-paciente" method="POST" action="/pacientes"
+            <div class="mb-3">
+                <label for="id_paciente" class="form-label">Id Paciente:</label>
+                <input type="text" id="id_paciente" name="id_paciente" class="form-control" required>
+            </div>
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre:</label>
                 <input type="text" id="nombre" name="nombre" class="form-control" required>
@@ -28,6 +32,9 @@
             </div>
             <button type="submit" class="btn btn-primary">Guardar</button>
         </form>
+        
+        
+        
     </div>
 </div>
 

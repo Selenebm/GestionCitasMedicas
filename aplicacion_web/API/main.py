@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response, Response
+from flask import Flask, render_template, request,redirect, jsonify, url_for, make_response, Response, flash
 from models import db, Medico, Paciente, Cita, Notificacion
 from datetime import datetime
 from __init__ import create_app
@@ -9,23 +9,82 @@ from flask import send_file, current_app
 
 app = create_app()
 
+app.secret_key = "secret_key"
+
 # Ruta de prueba
 @app.route('/')
 def test():
+    nuevo_paciente = Paciente(
+                id_paciente=1115309309,
+                nombre="Guadalupe Belalcazar",
+                telefono="3127167148",
+                email="guadalupe567@gmail.com",
+                doctor_preferido=1169964632
+            )
+    db.session.add(nuevo_paciente)
+    db.session.commit()
     return render_template("base.html")
 
 # Renderizado del frontend
 @app.route('/citas')
 def citas():
     citas = Cita.query.all()
-    print(citas)  # Esto imprimirá las citas en la consola
     return render_template('citas.html', citas=citas)
 
-@app.route('/pacientes')
+@app.route('/pacientes', methods=['GET', 'POST'])
 def pacientes():
+    if request.method == "POST":
+        try:
+            id_paciente = int(request.form.get('id_paciente'))
+            nombre = request.form.get('nombre')
+            telefono = request.form.get('telefono')
+            email = request.form.get('email')
+            doctor_preferido = int(request.form.get('doctor_preferido'))
+
+            nuevo_paciente = Paciente(
+                id_paciente=id_paciente,
+                nombre=nombre,
+                telefono=telefono,
+                email=email,
+                doctor_preferido=doctor_preferido
+            )
+
+            db.session.add(nuevo_paciente)
+            db.session.commit()
+            flash("Paciente añadido correctamente.", "success")
+        except Exception as e:
+            app.logger.error(f"Error inesperado al añadir paciente: {e}")
+            db.session.rollback()
+            flash("Ocurrió un error. Inténtalo nuevamente.", "danger")
+
     pacientes = Paciente.query.all()
-    print(pacientes)
     return render_template('pacientes.html', pacientes=pacientes)
+
+
+
+#Ver paciente especifico:
+# Ruta para obtener un solo médico por su ID
+@app.route('/pacientes/<int:id_paciente>', methods=['GET'])
+def get_paciente(id_paciente):
+    try:
+        paciente = Paciente.query.filter_by(id_paciente=id_paciente).first()
+        if paciente:
+            return make_json_response({'Paciente': paciente.json()})
+        else:
+            return make_json_response({'message': 'Paciente no encontrado'}, status=404)
+    except Exception as e:
+        return make_json_response({'message': 'Error al traer el pacientes', 'error': str(e)}, status=500)
+
+# @app.route('/pacientes/agregar', methods=['POST'])
+# def agregar_paciente():
+#     try:
+#         flash("Paciente creado exitosamente.", "success")
+#         return redirect(url_for('pacientes'))
+#     except Exception as e:
+#         # Log para depurar errores
+#         print(f"Error al guardar el paciente: {e}")
+#         flash(f"Error al crear el paciente: {str(e)}", "danger")
+#         return redirect(url_for('pacientes'))
 
 
 @app.route('/medicos')
@@ -75,13 +134,10 @@ def reservar_cita():
         # Filtra los médicos por especialidad
         medicos = Medico.query.filter_by(especialidad=especialidad).all()
         for medico in medicos:
-<<<<<<< HEAD
-=======
             if isinstance(medico.horarios_disponibles, list):
                 horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
             else:
                 return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
->>>>>>> d0ca59ea57aacb1af1d5750e833f99b404bd903f
             # Limpia las comillas del horario en la lista de horarios disponibles
             horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
 
@@ -211,22 +267,22 @@ def get_pacientes():
     except Exception as e:
         return make_json_response({'message': 'Error al acceder a los pacientes', 'error': str(e)}, status=500)
 
-@app.route('/pacientes', methods=['POST'])
-def crear_paciente():
-    try:
-        data = request.get_json()
-        nuevo_paciente = Paciente(
-            id_paciente=data['id_paciente'],
-            nombre=data['nombre'],
-            telefono=data['telefono'],
-            email=data['email'],
-            doctor_preferido=data.get('doctor_preferido')
-        )
-        db.session.add(nuevo_paciente)
-        db.session.commit()
-        return make_json_response({'message': 'Paciente creado'}, status=201)
-    except Exception as e:
-        return make_json_response({'message': 'Error al crear el paciente', 'error': str(e)}, status=500)
+# @app.route('/pacientes', methods=['POST'])
+# def crear_paciente():
+#     try:
+#         data = request.get_json()
+#         nuevo_paciente = Paciente(
+#             id_paciente=data['id_paciente'],
+#             nombre=data['nombre'],
+#             telefono=data['telefono'],
+#             email=data['email'],
+#             doctor_preferido=data.get('doctor_preferido')
+#         )
+#         db.session.add(nuevo_paciente)
+#         db.session.commit()
+#         return make_json_response({'message': 'Paciente creado'}, status=201)
+#     except Exception as e:
+#         return make_json_response({'message': 'Error al crear el paciente', 'error': str(e)}, status=500)
 
 # Actualizar un paciente
 @app.route('/pacientes/<int:id_paciente>', methods=['PUT'])
