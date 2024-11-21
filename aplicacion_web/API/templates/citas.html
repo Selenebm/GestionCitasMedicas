@@ -13,20 +13,21 @@
             <th>Paciente</th>
             <th>Médico</th>
             <th>Estado</th>
+            <th>Asistio</th>
         </tr>
     </thead>
     <tbody>
         {% for cita in citas %}
         <tr>
-            <td>{{ cita.id }}</td>
+            <td>{{ cita.id_cita }}</td>
             <td>{{ cita.fecha }}</td>
             <td>{{ cita.hora }}</td>
-            <td>{{ cita.paciente }}</td>
-            <td>{{ cita.medico }}</td>
+            <td>{{ cita.id_paciente }}</td>
+            <td>{{ cita.id_medico }}</td>
             <td>{{ cita.estado }}</td>
+            <td>{{ cita.asistio }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% endblock %}
-

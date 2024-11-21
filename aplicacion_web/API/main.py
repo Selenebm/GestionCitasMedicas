@@ -12,16 +12,20 @@ app = create_app()
 # Ruta de prueba
 @app.route('/')
 def test():
-    return make_response(jsonify({'message': 'Ruta de prueba'}), 200)
+    return render_template("base.html")
 
 # Renderizado del frontend
 @app.route('/citas')
 def citas():
-    return render_template('citas.html')
+    citas = Cita.query.all()
+    print(citas)  # Esto imprimirá las citas en la consola
+    return render_template('citas.html', citas=citas)
 
 @app.route('/pacientes')
 def pacientes():
-    return render_template('pacientes.html')
+    pacientes = Paciente.query.all()
+    print(pacientes)
+    return render_template('pacientes.html', pacientes=pacientes)
 
 
 @app.route('/medicos')
@@ -54,7 +58,7 @@ def make_json_response(data, status=200):
         status=status
     )
 
-# Toda la lógica para reservar citas
+# Toda la logica para reservar citas
 @app.route('/citas/reservar_cita', methods=['POST'])
 def reservar_cita():
     try:
@@ -71,16 +75,10 @@ def reservar_cita():
         # Filtra los médicos por especialidad
         medicos = Medico.query.filter_by(especialidad=especialidad).all()
         for medico in medicos:
-<<<<<<< HEAD
-            if isinstance(medico.horarios_disponibles, list):
-                horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
-            else:
-                return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
-=======
             # Limpia las comillas del horario en la lista de horarios disponibles
             horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
->>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 
+            # Verifica si el horario está disponible
             if fecha_hora in horarios_disponibles:
                 # Crear la cita
                 cita = Cita(
@@ -106,20 +104,15 @@ def reservar_cita():
     except Exception as e:
         return jsonify({'message': 'Error al reservar cita', 'error': str(e)}), 500
 
-<<<<<<< HEAD
-# Cancelar citas
-=======
-
-
 
 # Para cancelar citas
->>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 @app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
 def cancelar_cita(cita_id):
     try:
         data = request.get_json()
-        asistio = data.get('asistio', False)
+        asistio = data.get('asistio', False)  # Asegura un valor por defecto
 
+        # Busca la cita
         cita = Cita.query.get(cita_id)
         if not cita:
             return jsonify({'message': 'Cita no encontrada'}), 404
@@ -127,6 +120,7 @@ def cancelar_cita(cita_id):
         if cita.estado == 'cancelada':
             return jsonify({'message': 'La cita ya está cancelada'}), 409
 
+        # Cancela la cita
         cita.estado = 'cancelada'
         cita.asistio = asistio
         db.session.commit()
@@ -141,7 +135,7 @@ def get_citas():
     try:
         citas = Cita.query.all()
         return make_json_response({
-            'message': 'Citas encontradas',
+            'message': 'Citas encontrados',
             'citas': [cita.json() for cita in citas]
         })
     except Exception as e:
