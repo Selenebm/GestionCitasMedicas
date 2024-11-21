@@ -71,32 +71,49 @@ def reservar_cita():
         # Filtra los médicos por especialidad
         medicos = Medico.query.filter_by(especialidad=especialidad).all()
         for medico in medicos:
+<<<<<<< HEAD
             if isinstance(medico.horarios_disponibles, list):
                 horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
             else:
                 return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
+=======
+            # Limpia las comillas del horario en la lista de horarios disponibles
+            horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
+>>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 
             if fecha_hora in horarios_disponibles:
+                # Crear la cita
                 cita = Cita(
-                    fecha=fecha_hora[:9],
-                    hora=fecha_hora[11:],
+                    fecha=fecha_hora.split()[0],  # Obtiene solo la fecha
+                    hora=fecha_hora.split()[1],  # Obtiene solo la hora
                     estado='Asignada',
                     asistio=None,
                     id_paciente=paciente_id,
                     id_medico=medico.id_medico
                 )
-
                 db.session.add(cita)
+
+                # Elimina el horario de los horarios disponibles del médico
+                horarios_disponibles.remove(fecha_hora)
+                medico.horarios_disponibles = [f"'{h}'" for h in horarios_disponibles]  # Añade comillas al guardar
+
                 db.session.commit()
+
                 return jsonify({'message': 'Cita reservada', 'cita': cita.json()}), 201
-            medico.horarios_disponibles.remove(f"'{fecha_hora}'")
 
         return jsonify({'message': 'No hay médicos disponibles en este horario'}), 400
 
     except Exception as e:
         return jsonify({'message': 'Error al reservar cita', 'error': str(e)}), 500
 
+<<<<<<< HEAD
 # Cancelar citas
+=======
+
+
+
+# Para cancelar citas
+>>>>>>> ec39ec25925203aac7b896f24d057e0b782617f5
 @app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
 def cancelar_cita(cita_id):
     try:
@@ -130,6 +147,23 @@ def get_citas():
     except Exception as e:
         return make_json_response({
             'message': 'Error al buscar las citas',
+            'error': str(e)
+        }, status=500)
+    
+#Ver cita en especifico
+@app.route('/citas/<int:id_cita>', methods=['GET'])
+def get_cita(id_cita):
+    try:
+        cita = Cita.query.filter_by(id_cita=id_cita).first()
+        if cita:
+            return make_json_response({'Cita:': cita.json()})
+        
+        else:
+            return make_json_response({'message': 'Cita no encontrada'}, status=404)
+        
+    except Exception as e:
+        return make_json_response({
+            'message': 'Error al buscar la cita',
             'error': str(e)
         }, status=500)
 
