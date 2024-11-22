@@ -213,6 +213,9 @@ def medicos():
             especialidad = request.form.get('especialidad')
             horarios_disponibles = request.form.get('horarios_disponibles')
 
+            # Transformar la cadena de horarios en una lista de cadenas (separados por coma)
+            horarios_disponibles = [h.strip() for h in horarios_disponibles.split(',')]
+
             # Crear una nueva instancia de Medico
             nuevo_medico = Medico(
                 id_medico=id_medico,
@@ -234,6 +237,7 @@ def medicos():
     # Obtener la lista de médicos para mostrar en la tabla
     medicos = Medico.query.all()
     return render_template('medicos.html', medicos=medicos)
+
 
 #RUTA PARA VER UN SOLO MÉDICO
 @app.route('/medicos/<int:medico_id>', methods=['GET'])
