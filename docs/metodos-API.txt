@@ -1,38 +1,35 @@
-# Comprobar que esté funcionando:
+# Comprobar que esté funcionando (devuelve un html):
 
-curl -X GET http://127.0.0.1:8080/
+curl -X GET http://127.0.0.1:8080/ 
 
-# Crear cita:
+# Método PUT en Pacientes.
+# Actualizar paciente:
 
-curl -X POST http://127.0.0.1:8080/citas/reservar_cita \
+curl -X PUT http://127.0.0.1:8080/paciente/1187116400 \
 -H "Content-Type: application/json" \
--d '{"paciente_id": 1187116400, "especialidad": "Medicina de Urgencias", "fecha_hora": "2024-12-24 16:20"}'
+-d '{"nombre": "Pepito Perez", "telefono": "123456789", "email": "pepitoperez123@gmail.com", "doctor_preferido": 86065508}'
 
+# Método DELETE en Pacientes.
+# Eliminar paciente (sirve solo si el paciente ya está creado):
+
+curl -X DELETE http://127.0.0.1:8080/pacientes/1012916241
+
+# Método PUT en Citas.
 # Cancelar cita:
 
-curl -X PUT http://127.0.0.1:8080/citas/cancelar_cita/15 \
+curl -X PUT http://127.0.0.1:8080/citas/cancelar_cita/20 \
 -H "Content-Type: application/json" \
 -d '{"asistio": false}'
 
-# Crear médico:
 
-curl -X POST http://127.0.0.1:8080/crear_medico \
--H "Content-Type: application/json" \
--d '{"id_medico": 1114308308, "nombre": "Selene Belalcazar", "especialidad": "Neurocirujana", "horarios_disponibles": ["2024-12-03 13:00", "2024-12-24 16:20"]}'
-
+# Método PUT en Médicos.
 # Actualizar médico:
 
 curl -X PUT http://127.0.0.1:8080/medicos/1114308308 \
 -H "Content-Type: application/json" \
 -d '{"nombre": "Selene Belalcazar Muñoz", "especialidad": "Neurocirujana", "horarios_disponibles": ["2024-12-03 13:00", "2024-12-24 16:20"]}'
 
-
+# Método DELETE en Médicos.
 # Eliminar médico (profesionalmente no se debe hacer por la integridad referencial):
 
-curl -X DELETE http://127.0.0.1:8080/medicos/86065508
-
-# Reportes:
-
-curl -X GET "http://localhost:8080/reporte?tipo=medicos_demandados" -o reporte_medicos_demandados.xlsx
-
-curl -X GET "http://localhost:8080/reporte?tipo=motivos_cancelacion" -o reporte_motivos_cancelacion.xlsx
+curl -X DELETE http://127.0.0.1:8080/medicos/1114308308
