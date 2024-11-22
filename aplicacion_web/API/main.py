@@ -328,22 +328,6 @@ def get_pacientes():
     except Exception as e:
         return make_json_response({'message': 'Error al acceder a los pacientes', 'error': str(e)}, status=500)
 
-# @app.route('/pacientes', methods=['POST'])
-# def crear_paciente():
-#     try:
-#         data = request.get_json()
-#         nuevo_paciente = Paciente(
-#             id_paciente=data['id_paciente'],
-#             nombre=data['nombre'],
-#             telefono=data['telefono'],
-#             email=data['email'],
-#             doctor_preferido=data.get('doctor_preferido')
-#         )
-#         db.session.add(nuevo_paciente)
-#         db.session.commit()
-#         return make_json_response({'message': 'Paciente creado'}, status=201)
-#     except Exception as e:
-#         return make_json_response({'message': 'Error al crear el paciente', 'error': str(e)}, status=500)
 
 # Actualizar un paciente
 @app.route('/pacientes/<int:id_paciente>', methods=['PUT'])
@@ -384,24 +368,50 @@ def eliminar_paciente(id_paciente):
 @app.route('/reporte', methods=['GET'])
 def exportar_reporte():
     tipo = request.args.get('tipo')
-    if tipo == 'medicos_demandados':
-        medicos = Medico.query.all()
-        data = [{'medico': m.nombre, 'citas': len(m.citas)} for m in medicos]
-    elif tipo == 'motivos_cancelacion':
-        citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
-        data = [{'medico': c.id_medico, 'paciente': c.id_paciente, 'fecha': f"{c.fecha}/{c.hora}"} for c in citas_canceladas]
-    else:
-        return make_json_response({'message': 'Tipo de reporte no válido'}), 400
+    print(f"Generando reporte tipo: {tipo}")  # Añadir para verificar si el tipo está llegando correctamente
 
-    df = pd.DataFrame(data)
-    output_dir = os.path.join(current_app.instance_path, 'reporte_temp')
-    os.makedirs(output_dir, exist_ok=True)
-    filename = f'reporte_{tipo}.xlsx'
-    filepath = os.path.join(output_dir, filename)
-    df.to_excel(filepath, index=False)
+    data = []
 
-    response = send_file(filepath, as_attachment=True, download_name=filename,
+    try:
+        if tipo == 'medicos_demandados':
+            # Obtener los médicos más demandados por cantidad de citas
+            medicos = Medico.query.all()
+            data = [{'Medico': m.nombre, 'Especialidad': m.especialidad, 'Citas': len(m.citas)} for m in medicos]
+
+        elif tipo == 'motivos_cancelacion':
+            # Obtener las citas canceladas
+            citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
+            data = [
+                {
+                    'Médico': c.medico.nombre if c.medico else 'N/A',
+                    'Paciente': c.paciente.nombre if c.paciente else 'N/A',
+                    'Fecha y Hora': f"{c.fecha} {c.hora}",
+                    'Estado': c.estado,
+                }
+                for c in citas_canceladas
+            ]
+        else:
+            return jsonify({'message': 'Tipo de reporte no válido'}), 400
+
+        # Crear DataFrame
+        df = pd.DataFrame(data)
+
+        # Crear directorio temporal para guardar el archivo
+        output_dir = os.path.join(current_app.instance_path, 'reporte_temp')
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f'reporte_{tipo}.xlsx'
+        filepath = os.path.join(output_dir, filename)
+
+        # Guardar el archivo Excel
+        df.to_excel(filepath, index=False)
+
+        # Retornar el archivo como respuesta para descarga
+        return send_file(filepath, as_attachment=True, download_name=filename,
                          mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    except Exception as e:
+        current_app.logger.error(f"Error al generar el reporte: {e}")
+        return jsonify({'message': 'Error al generar el reporte', 'error': str(e)}), 500
 
     @response.call_on_close
     def remove_file():

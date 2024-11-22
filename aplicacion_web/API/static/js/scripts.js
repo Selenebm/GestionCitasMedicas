@@ -1,24 +1,3 @@
-// // Manejo de eventos para agregar o editar pacientes
-// document.getElementById('form-paciente').addEventListener('submit', function (e) {
-//     e.preventDefault();
-
-//     const formData = new FormData(this);
-//     const data = Object.fromEntries(formData);
-//     const pacienteId = this.dataset.id; // ID del paciente (si está editando)
-
-//     fetch(pacienteId ? `/pacientes/${pacienteId}` : '/pacientes', {
-//         method: pacienteId ? 'PUT' : 'POST', // PUT para editar, POST para agregar
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(data)
-//     })
-//         .then(response => response.json())
-//         .then(result => {
-//             alert(result.message);
-//             location.reload(); // Recarga para actualizar la lista
-//         })
-//         .catch(error => console.error('Error:', error));
-// });
-
 // Función para editar un paciente
 function editarPaciente(id) {
     fetch(`/pacientes/${id}`)
