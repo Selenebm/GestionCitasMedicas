@@ -2,7 +2,12 @@
 
 ## Descripción del Proyecto
 
-Este sistema está diseñado para mejorar la gestión de citas médicas, el sistema permitirá a los pacientes agendar citas en línea, gestionar la disponibilidad de los médicos y generar informes detallados sobre el uso del servicio, sumado a eso mejorar la gestión de agenda de los medicos, atomatizando el gestionar una cita médica, brindandole al paciente la facilidad de escoger el médico, dia, hora, etc, además el sistema tiene una metodología de avisar con anterioridad al paciente de su cita y en tal caso cancelarla.
+Este sistema está diseñado para mejorar la gestión de citas médicas, el sistema permitirá a los pacientes agendar citas en línea, gestionar la disponibilidad de los médicos y generar informes detallados sobre el uso del servicio, sumado a eso mejorar la gestión de agenda de los medicos, atomatizando el gestionar una cita médica, brindandole al paciente la facilidad de escoger el médico, dia, hora, etc.
+
+# ¡Importante!
+
+Para probar la opción de actualizar datos y borrarlos ya sea de medicos, pacientes y citas se realiza por medio de consola, con ayuda de un bloc de notas ubicado en docs, donde se encuentran las instrucciones para ejecutarlo, para resto de funciones del gestor de citas medicas es por medio del LocalHost.
+
 
 ## Instalación
 
@@ -51,9 +56,13 @@ Si deseas contribuir a este proyecto, por favor sigue los siguientes pasos:
 5. **Crea un Pull Request.**
 
 
-## Contacto
+## Integrantes del proyecto:
 
-Si tienes alguna pregunta o sugerencia, no dudes en contactar al desarrollador principal:
+- Samuel S. Pinzón Reina.
+- Santiago Jimenez Castillo.
+- Andres F. Londoño Mendeta.
+- Selene Belalcazar Muñoz.
 
-- **Nombre:** Selene Belalcazar Muñoz
-- **Correo Electrónico:** selenebelalcazar@gmail.com
+
+
+

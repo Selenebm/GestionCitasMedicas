@@ -1,0 +1,38 @@
+# Comprobar que esté funcionando:
+
+curl -X GET http://127.0.0.1:8080/
+
+# Crear cita:
+
+curl -X POST http://127.0.0.1:8080/citas/reservar_cita \
+-H "Content-Type: application/json" \
+-d '{"paciente_id": 1187116400, "especialidad": "Medicina de Urgencias", "fecha_hora": "2024-12-24 16:20"}'
+
+# Cancelar cita:
+
+curl -X PUT http://127.0.0.1:8080/citas/cancelar_cita/15 \
+-H "Content-Type: application/json" \
+-d '{"asistio": false}'
+
+# Crear médico:
+
+curl -X POST http://127.0.0.1:8080/crear_medico \
+-H "Content-Type: application/json" \
+-d '{"id_medico": 1114308308, "nombre": "Selene Belalcazar", "especialidad": "Neurocirujana", "horarios_disponibles": ["2024-12-03 13:00", "2024-12-24 16:20"]}'
+
+# Actualizar médico:
+
+curl -X PUT http://127.0.0.1:8080/medicos/1114308308 \
+-H "Content-Type: application/json" \
+-d '{"nombre": "Selene Belalcazar Muñoz", "especialidad": "Neurocirujana", "horarios_disponibles": ["2024-12-03 13:00", "2024-12-24 16:20"]}'
+
+
+# Eliminar médico (profesionalmente no se debe hacer por la integridad de los datos):
+
+curl -X DELETE http://127.0.0.1:8080/medicos/86065508
+
+# Reportes:
+
+curl -X GET "http://localhost:8080/reporte?tipo=medicos_demandados" -o reporte_medicos_demandados.xlsx
+
+curl -X GET "http://localhost:8080/reporte?tipo=motivos_cancelacion" -o reporte_motivos_cancelacion.xlsx
