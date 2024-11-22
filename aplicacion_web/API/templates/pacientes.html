@@ -52,7 +52,7 @@
     <tbody>
         {% for paciente in pacientes %}
         <tr>
-            <td>{{ paciente.id_paciente }}</td>
+            <td><a href="/pacientes/{{ paciente.id_paciente }}">{{ paciente.id_paciente }}</a></td>
             <td>{{ paciente.nombre }}</td>
             <td>{{ paciente.telefono }}</td>
             <td>{{ paciente.email }}</td>

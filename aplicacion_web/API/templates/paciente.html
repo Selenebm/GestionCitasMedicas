@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Pacientes{% endblock %}
+
+{% block content %}
+<h2 class="text-center text-primary">Información de Paciente</h2>
+
+<!-- Tabla -->
+<table class="table table-bordered mt-4">
+    <thead class="bg-primary text-white">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Doctor Preferido</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ paciente.id_paciente }}</td>
+            <td>{{ paciente.nombre }}</td>
+            <td>{{ paciente.telefono }}</td>
+            <td>{{ paciente.email }}</td>
+            <td>{{ paciente.doctor_preferido }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

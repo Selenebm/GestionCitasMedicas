@@ -17,11 +17,10 @@ app.secret_key = "secret_key"
 def test():
     return render_template("base.html")
 
-# Renderizado del frontend
-# @app.route('/citas')
-# def citas():
-#     return render_template('citas.html', citas=citas)
-
+#--------------------------------------------
+#               Métodos Citas
+#--------------------------------------------
+# VER Y CREAR CITAS
 @app.route('/citas', methods=['GET', 'POST'])
 def citas():
     if request.method == "POST":
@@ -87,7 +86,46 @@ def citas():
     citas = Cita.query.all()
     return render_template('citas.html', citas=citas)
 
+#VER CITA EN ESPECIFICO
+@app.route('/citas/<int:id_cita>', methods=['GET'])
+def get_cita(id_cita):
+    cita = Cita.query.filter_by(id_cita=id_cita).first()
+    print(cita)
+    if cita:
+        return render_template("cita.html", cita=cita)
+    
+    else:
+        return render_template("404.html")
 
+#CANCELAR CITAS (SIRVE SOLO POR CONSOLA CON CURL. EN CARPETA DOCS SE ENCUENTRA UN EJEMPLO)
+@app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
+def cancelar_cita(cita_id):
+    try:
+        data = request.get_json()
+        asistio = data.get('asistio', False)  # Asegura un valor por defecto
+
+        # Busca la cita
+        cita = Cita.query.get(cita_id)
+        if not cita:
+            return jsonify({'message': 'Cita no encontrada'}), 404
+
+        if cita.estado == 'cancelada':
+            return jsonify({'message': 'La cita ya está cancelada'}), 409
+
+        # Cancela la cita
+        cita.estado = 'cancelada'
+        cita.asistio = asistio
+        db.session.commit()
+
+        return jsonify({'message': 'Cita cancelada', 'cita': cita.json()}), 200
+    except Exception as e:
+        return jsonify({'message': 'Error al cancelar cita', 'error': str(e)}), 500
+    
+
+#--------------------------------------------
+#               Métodos Pacientes
+#--------------------------------------------  
+#VER Y CREAR PACIENTES
 @app.route('/pacientes', methods=['GET', 'POST'])
 def pacientes():
     if request.method == "POST":
@@ -117,22 +155,54 @@ def pacientes():
     pacientes = Paciente.query.all()
     return render_template('pacientes.html', pacientes=pacientes)
 
-
-
-#Ver paciente especifico:
-# Ruta para obtener un solo médico por su ID
+#VER PACIENTE EN ESPECIFICO
 @app.route('/pacientes/<int:id_paciente>', methods=['GET'])
 def get_paciente(id_paciente):
+    paciente = Paciente.query.filter_by(id_paciente=id_paciente).first()
+    if paciente:
+        return render_template("paciente.html", paciente=paciente)
+    else:
+        return render_template("404.html"), 404
+
+# ACTUALIZAR UN PACIENTE (SIRVE SOLO POR CONSOLA CON CURL. EN CARPETA DOCS SE ENCUENTRA UN EJEMPLO)
+@app.route('/pacientes/<int:id_paciente>', methods=['PUT'])
+def actualizar_paciente(id_paciente):
     try:
-        paciente = Paciente.query.filter_by(id_paciente=id_paciente).first()
-        if paciente:
-            return make_json_response({'Paciente': paciente.json()})
-        else:
+        data = request.get_json()
+        paciente = Paciente.query.get(id_paciente)
+        if not paciente:
             return make_json_response({'message': 'Paciente no encontrado'}, status=404)
+
+        paciente.nombre = data.get('nombre', paciente.nombre)
+        paciente.telefono = data.get('telefono', paciente.telefono)
+        paciente.email = data.get('email', paciente.email)
+        paciente.doctor_preferido = data.get('doctor_preferido', paciente.doctor_preferido)
+
+        db.session.commit()
+
+        return make_json_response({'message': 'Paciente actualizado', 'paciente': paciente.json()})
     except Exception as e:
-        return make_json_response({'message': 'Error al traer el pacientes', 'error': str(e)}, status=500)
+        return make_json_response({'message': 'Error al actualizar el paciente', 'error': str(e)}, status=500)
 
+# ELIMINAR UN PACIENTE (SIRVE SOLO POR CONSOLA CON CURL. EN CARPETA DOCS SE ENCUENTRA UN EJEMPLO)
+@app.route('/pacientes/<int:id_paciente>', methods=['DELETE'])
+def eliminar_paciente(id_paciente):
+    try:
+        paciente = Paciente.query.get(id_paciente)
+        if not paciente:
+            return make_json_response({'message': 'Paciente no encontrado'}, status=404)
 
+        db.session.delete(paciente)
+        db.session.commit()
+
+        return make_json_response({'message': 'Paciente eliminado'})
+    except Exception as e:
+        return make_json_response({'message': 'Error al eliminar el paciente', 'error': str(e)}, status=500)
+
+#--------------------------------------------
+#               Métodos Pacientes
+#--------------------------------------------  
+#VER Y CREAR MÉDICOS
 @app.route('/medicos', methods=['GET', 'POST'])
 def medicos():
     if request.method == "POST":
@@ -165,222 +235,71 @@ def medicos():
     medicos = Medico.query.all()
     return render_template('medicos.html', medicos=medicos)
 
+#RUTA PARA VER UN SOLO MÉDICO
+@app.route('/medicos/<int:medico_id>', methods=['GET'])
+def get_medico(medico_id):
+    medico = Medico.query.filter_by(id_medico=medico_id).first()
+    if medico:
+        return render_template("medico.html", medico=medico)
+    else:
+        return render_template("404.html"), 404
+
+#ACTUALIZAR DATOS DE UN MÉDICO (SIRVE SOLO POR CONSOLA CON CURL. EN CARPETA DOCS SE ENCUENTRA UN EJEMPLO)
+@app.route('/medicos/<int:medico_id>', methods=['PUT'])
+def actualizar_medico(medico_id):
+    try:
+        data = request.get_json()
+        medico = Medico.query.filter_by(id_medico=medico_id).first()
+        if medico:
+            medico.nombre = data['nombre']
+            medico.especialidad = data['especialidad']
+            medico.horarios_disponibles = data['horarios_disponibles']
+            db.session.commit()
+            return make_json_response({'message': 'Medico actualizado'})
+        else:
+            return make_json_response({'message': 'Medico no encontrado'}, status=404)
+    except Exception as e:
+        return make_json_response({
+            'message': 'Error al actualizar el médico',
+            'error': str(e)
+        }, status=500)
+
+#ELIMINAR UN MÉDICO (SIRVE SOLO POR CONSOLA CON CURL. EN CARPETA DOCS SE ENCUENTRA UN EJEMPLO)
+@app.route('/medicos/<int:medico_id>', methods=['DELETE'])
+def eliminar_medico(medico_id):
+    try:
+        medico = Medico.query.filter_by(id_medico=medico_id).first()
+        if medico:
+            db.session.delete(medico)
+            db.session.commit()
+            return make_json_response({'message': 'Medico eliminado'})
+        else:
+            return make_json_response({'message': 'Medico no encontrado'}, status=404)
+    except Exception as e:
+        return make_json_response({
+            'message': 'Error al eliminar el médico',
+            'error': str(e)
+        }, status=500)
 
 
+# Ruta para mostrar la página de reportes
 @app.route('/reporte')
 def reportes():
     return render_template('reportes.html')
 
-# Vuelve los return JSONs que aceptan tildes
-def make_json_response(data, status=200):
-    return Response(
-        json.dumps(data, ensure_ascii=False),
-        mimetype='application/json',
-        status=status
-    )
-
-# Toda la logica para reservar citas
-@app.route('/citas/reservar_cita', methods=['POST'])
-def reservar_cita():
-    try:
-        data = request.get_json()
-        paciente_id = data['paciente_id']
-        especialidad = data['especialidad']
-        fecha_hora = data['fecha_hora']
-
-        # Valida que el paciente exista
-        paciente = Paciente.query.get(paciente_id)
-        if not paciente:
-            return jsonify({'message': 'Paciente no encontrado'}), 404
-
-        # Filtra los médicos por especialidad
-        medicos = Medico.query.filter_by(especialidad=especialidad).all()
-        for medico in medicos:
-            if isinstance(medico.horarios_disponibles, list):
-                horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
-            else:
-                return jsonify({'message': 'El campo horarios_disponibles tiene un formato inválido'}), 500
-            # Limpia las comillas del horario en la lista de horarios disponibles
-            horarios_disponibles = [h.strip("'") for h in medico.horarios_disponibles]
-
-            # Verifica si el horario está disponible
-            if fecha_hora in horarios_disponibles:
-                # Crear la cita
-                cita = Cita(
-                    fecha=fecha_hora.split()[0],  # Obtiene solo la fecha
-                    hora=fecha_hora.split()[1],  # Obtiene solo la hora
-                    estado='Asignada',
-                    asistio=None,
-                    id_paciente=paciente_id,
-                    id_medico=medico.id_medico
-                )
-                db.session.add(cita)
-
-                # Elimina el horario de los horarios disponibles del médico
-                horarios_disponibles.remove(fecha_hora)
-                medico.horarios_disponibles = [f"'{h}'" for h in horarios_disponibles]  # Añade comillas al guardar
-
-                db.session.commit()
-
-                return jsonify({'message': 'Cita reservada', 'cita': cita.json()}), 201
-
-        return jsonify({'message': 'No hay médicos disponibles en este horario'}), 400
-
-    except Exception as e:
-        return jsonify({'message': 'Error al reservar cita', 'error': str(e)}), 500
-
-
-# Para cancelar citas
-@app.route('/citas/cancelar_cita/<int:cita_id>', methods=['PUT'])
-def cancelar_cita(cita_id):
-    try:
-        data = request.get_json()
-        asistio = data.get('asistio', False)  # Asegura un valor por defecto
-
-        # Busca la cita
-        cita = Cita.query.get(cita_id)
-        if not cita:
-            return jsonify({'message': 'Cita no encontrada'}), 404
-
-        if cita.estado == 'cancelada':
-            return jsonify({'message': 'La cita ya está cancelada'}), 409
-
-        # Cancela la cita
-        cita.estado = 'cancelada'
-        cita.asistio = asistio
-        db.session.commit()
-
-        return jsonify({'message': 'Cita cancelada', 'cita': cita.json()}), 200
-    except Exception as e:
-        return jsonify({'message': 'Error al cancelar cita', 'error': str(e)}), 500
-
-# Obtener todas las citas
-@app.route('/citas', methods=['GET'])
-def get_citas():
-    try:
-        citas = Cita.query.all()
-        return make_json_response({
-            'message': 'Citas encontrados',
-            'citas': [cita.json() for cita in citas]
-        })
-    except Exception as e:
-        return make_json_response({
-            'message': 'Error al buscar las citas',
-            'error': str(e)
-        }, status=500)
-    
-#Ver cita en especifico
-@app.route('/citas/<int:id_cita>', methods=['GET'])
-def get_cita(id_cita):
-    try:
-        cita = Cita.query.filter_by(id_cita=id_cita).first()
-        if cita:
-            return make_json_response({'Cita:': cita.json()})
-        
-        else:
-            return make_json_response({'message': 'Cita no encontrada'}, status=404)
-        
-    except Exception as e:
-        return make_json_response({
-            'message': 'Error al buscar la cita',
-            'error': str(e)
-        }, status=500)
-
-# Ruta para obtener todos los médicos
-
-# Ruta para obtener un solo médico por su ID
-@app.route('/medicos/<int:medico_id>', methods=['GET'])
-def get_medico(medico_id):
-    try:
-        medico = Medico.query.filter_by(id_medico=medico_id).first()
-        if medico:
-            return make_json_response({'Medico': medico.json()})
-        else:
-            return make_json_response({'message': 'Medico no encontrado'}, status=404)
-    except Exception as e:
-        return make_json_response({'message': 'Error al traer el médico', 'error': str(e)}, status=500)
-
-
-@app.route('/crear_medico', methods=['POST'])
-def crear_medico():
-    try:
-        data = request.get_json()
-        nuevo_medico = Medico(
-            id_medico=data['id_medico'],
-            nombre=data['nombre'],
-            especialidad=data['especialidad'],
-            horarios_disponibles=data['horarios_disponibles']
-        )
-        db.session.add(nuevo_medico)
-        db.session.commit()
-        return make_json_response({'message': 'Medico creado'}, status=201)
-    except Exception as e:
-        return make_json_response({'message': 'Error al crear el médico', 'error': str(e)}, status=500)
-
-# CRUD para Pacientes
-@app.route('/pacientes', methods=['GET'])
-def get_pacientes():
-    try:
-        pacientes = Paciente.query.all()
-        return make_json_response({
-            'message': 'Pacientes encontrados',
-            'pacientes': [paciente.json() for paciente in pacientes]
-        })
-    except Exception as e:
-        return make_json_response({'message': 'Error al acceder a los pacientes', 'error': str(e)}, status=500)
-
-
-# Actualizar un paciente
-@app.route('/pacientes/<int:id_paciente>', methods=['PUT'])
-def actualizar_paciente(id_paciente):
-    try:
-        data = request.get_json()
-        paciente = Paciente.query.get(id_paciente)
-        if not paciente:
-            return make_json_response({'message': 'Paciente no encontrado'}, status=404)
-
-        paciente.nombre = data.get('nombre', paciente.nombre)
-        paciente.telefono = data.get('telefono', paciente.telefono)
-        paciente.email = data.get('email', paciente.email)
-        paciente.doctor_preferido = data.get('doctor_preferido', paciente.doctor_preferido)
-
-        db.session.commit()
-
-        return make_json_response({'message': 'Paciente actualizado', 'paciente': paciente.json()})
-    except Exception as e:
-        return make_json_response({'message': 'Error al actualizar el paciente', 'error': str(e)}, status=500)
-
-# Eliminar un paciente
-@app.route('/pacientes/<int:id_paciente>', methods=['DELETE'])
-def eliminar_paciente(id_paciente):
-    try:
-        paciente = Paciente.query.get(id_paciente)
-        if not paciente:
-            return make_json_response({'message': 'Paciente no encontrado'}, status=404)
-
-        db.session.delete(paciente)
-        db.session.commit()
-
-        return make_json_response({'message': 'Paciente eliminado'})
-    except Exception as e:
-        return make_json_response({'message': 'Error al eliminar el paciente', 'error': str(e)}, status=500)
-
-# Exportar reportes a Excel
-@app.route('/reporte', methods=['GET'])
+# Ruta para exportar reportes a Excel
+@app.route('/reporte/exportar', methods=['GET'])
 def exportar_reporte():
     tipo = request.args.get('tipo')
-    print(f"Generando reporte tipo: {tipo}")  # Añadir para verificar si el tipo está llegando correctamente
-
-    data = []
+    if not tipo:
+        return render_template('404.html', message='Tipo de reporte no especificado')
 
     try:
+        # Generar datos para el reporte
         if tipo == 'medicos_demandados':
-            # Obtener los médicos más demandados por cantidad de citas
             medicos = Medico.query.all()
             data = [{'Medico': m.nombre, 'Especialidad': m.especialidad, 'Citas': len(m.citas)} for m in medicos]
-
         elif tipo == 'motivos_cancelacion':
-            # Obtener las citas canceladas
             citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
             data = [
                 {
@@ -392,34 +311,39 @@ def exportar_reporte():
                 for c in citas_canceladas
             ]
         else:
-            return jsonify({'message': 'Tipo de reporte no válido'}), 400
+            return render_template('404.html', message='Tipo de reporte no válido')
 
         # Crear DataFrame
         df = pd.DataFrame(data)
-
-        # Crear directorio temporal para guardar el archivo
-        output_dir = os.path.join(current_app.instance_path, 'reporte_temp')
-        os.makedirs(output_dir, exist_ok=True)
-        filename = f'reporte_{tipo}.xlsx'
-        filepath = os.path.join(output_dir, filename)
-
-        # Guardar el archivo Excel
+        filename = f'reporte_{tipo}_{int(time.time())}.xlsx'
+        filepath = os.path.join('reporte_temp', filename)
+        os.makedirs('reporte_temp', exist_ok=True)
         df.to_excel(filepath, index=False)
 
-        # Retornar el archivo como respuesta para descarga
+        # Descargar el archivo
         return send_file(filepath, as_attachment=True, download_name=filename,
                          mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     except Exception as e:
         current_app.logger.error(f"Error al generar el reporte: {e}")
-        return jsonify({'message': 'Error al generar el reporte', 'error': str(e)}), 500
+        return render_template('404.html', message='Error al generar el reporte')
 
-    @response.call_on_close
-    def remove_file():
-        if os.path.exists(filepath):
-            os.remove(filepath)
+    finally:
+        # Eliminar archivo temporal después de la respuesta
+        @response.call_on_close
+        def remove_temp_file():
+            if os.path.exists(filepath):
+                os.remove(filepath)
 
-    return response
 
+
+# Vuelve los return JSONs que aceptan tildes
+def make_json_response(data, status=200):
+    return Response(
+        json.dumps(data, ensure_ascii=False),
+        mimetype='application/json',
+        status=status
+    )
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

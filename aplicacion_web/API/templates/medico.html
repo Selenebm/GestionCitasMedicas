@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Médicos{% endblock %}
+
+{% block content %}
+<h2 class="text-center text-primary">Información de Médico</h2>
+
+<!-- Tabla -->
+<table class="table table-bordered mt-4">
+    <thead class="bg-primary text-white">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Especialidad</th>
+            <th>Horarios Disponibles</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ medico.id_medico }}</td>
+            <td>{{ medico.nombre }}</td>
+            <td>{{ medico.especialidad }}</td>
+            <td>{{ medico.horarios_disponibles }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
+
+

@@ -27,7 +27,7 @@ curl -X PUT http://127.0.0.1:8080/medicos/1114308308 \
 -d '{"nombre": "Selene Belalcazar Muñoz", "especialidad": "Neurocirujana", "horarios_disponibles": ["2024-12-03 13:00", "2024-12-24 16:20"]}'
 
 
-# Eliminar médico (profesionalmente no se debe hacer por la integridad de los datos):
+# Eliminar médico (profesionalmente no se debe hacer por la integridad referencial):
 
 curl -X DELETE http://127.0.0.1:8080/medicos/86065508
 

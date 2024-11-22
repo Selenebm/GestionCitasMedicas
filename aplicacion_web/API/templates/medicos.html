@@ -44,7 +44,7 @@
     <tbody>
         {% for medico in medicos %}
         <tr>
-            <td>{{ medico.id_medico }}</td>
+            <td><a href="/medicos/{{ medico.id_medico }}">{{ medico.id_medico }}</a></td>
             <td>{{ medico.nombre }}</td>
             <td>{{ medico.especialidad }}</td>
             <td>{{ medico.horarios_disponibles }}</td>

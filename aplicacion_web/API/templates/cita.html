@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Citas{% endblock %}
+
+{% block content %}
+<h2 class="text-center text-primary">Consulta de Cita Individual</h2>
+
+<!-- Tabla -->
+<table class="table table-bordered mt-4">
+    <thead class="bg-primary text-white">
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Estado</th>
+            <th>Asistió</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ cita.id_cita }}</td>
+            <td>{{ cita.fecha }}</td>
+            <td>{{ cita.hora }}</td>
+            <td>{{ cita.id_paciente }}</td>
+            <td>{{ cita.id_medico }}</td>
+            <td>{{ cita.medico.especialidad if cita.medico else 'N/A' }}</td>
+            <td>{{ cita.estado }}</td>
+            <td>{{ cita.asistio }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

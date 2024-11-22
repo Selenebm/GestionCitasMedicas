@@ -48,7 +48,7 @@
     <tbody>
         {% for cita in citas %}
         <tr>
-            <td>{{ cita.id_cita }}</td>
+            <td><a href="/citas/{{ cita.id_cita }}">{{ cita.id_cita }}</a></td>
             <td>{{ cita.fecha }}</td>
             <td>{{ cita.hora }}</td>
             <td>{{ cita.id_paciente }}</td>
