@@ -282,59 +282,51 @@ def eliminar_medico(medico_id):
         }, status=500)
 
 
-# Ruta para mostrar la página de reportes
-@app.route('/reporte')
+#--------------------------------------------
+#               Métodos Pacientes
+#--------------------------------------------  
+#RUTA PARA MOSTRAR PÁGINA DE LA QUE SE DESCARGAN LOS REPORTES
+@app.route('/reportes')
 def reportes():
     return render_template('reportes.html')
 
-# Ruta para exportar reportes a Excel
-@app.route('/reporte/exportar', methods=['GET'])
+#PROCESO DE CREACIÓN Y DESCARGA DE LOS REPORTES
+@app.route('/reporte', methods=['GET'])
 def exportar_reporte():
     tipo = request.args.get('tipo')
-    if not tipo:
-        return render_template('404.html', message='Tipo de reporte no especificado')
+    
+    if tipo == 'medicos_demandados':
+        medicos = Medico.query.all()
+        data = [{'medico': m.nombre, 'citas': len(m.citas)} for m in medicos]
+    elif tipo == 'motivos_cancelacion':
+        citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
+        data = [{'medico': c.id_medico, 'paciente': c.id_paciente,'fecha': f"{c.fecha}/{c.hora}"} for c in citas_canceladas]
+    else:
+        return make_json_response({'message': 'Tipo de reporte no válido'}), 400
 
-    try:
-        # Generar datos para el reporte
-        if tipo == 'medicos_demandados':
-            medicos = Medico.query.all()
-            data = [{'Medico': m.nombre, 'Especialidad': m.especialidad, 'Citas': len(m.citas)} for m in medicos]
-        elif tipo == 'motivos_cancelacion':
-            citas_canceladas = Cita.query.filter_by(estado='Cancelada').all()
-            data = [
-                {
-                    'Médico': c.medico.nombre if c.medico else 'N/A',
-                    'Paciente': c.paciente.nombre if c.paciente else 'N/A',
-                    'Fecha y Hora': f"{c.fecha} {c.hora}",
-                    'Estado': c.estado,
-                }
-                for c in citas_canceladas
-            ]
-        else:
-            return render_template('404.html', message='Tipo de reporte no válido')
+    # Crear DataFrame y archivo en una carpeta temporal
+    df = pd.DataFrame(data)
+    output_dir = os.path.join(current_app.instance_path, 'reporte_temp')
+    os.makedirs(output_dir, exist_ok=True)  # Crea la carpeta si no existe
+    filename = f'reporte_{tipo}.xlsx'
+    filepath = os.path.join(output_dir, filename)
+    df.to_excel(filepath, index=False)
 
-        # Crear DataFrame
-        df = pd.DataFrame(data)
-        filename = f'reporte_{tipo}_{int(time.time())}.xlsx'
-        filepath = os.path.join('reporte_temp', filename)
-        os.makedirs('reporte_temp', exist_ok=True)
-        df.to_excel(filepath, index=False)
+    # Servir el archivo al cliente
+    response = send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,  # Cambiado de attachment_filename a download_name
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
-        # Descargar el archivo
-        return send_file(filepath, as_attachment=True, download_name=filename,
-                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Eliminar el archivo después de enviarlo
+    @response.call_on_close
+    def remove_file():
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
-    except Exception as e:
-        current_app.logger.error(f"Error al generar el reporte: {e}")
-        return render_template('404.html', message='Error al generar el reporte')
-
-    finally:
-        # Eliminar archivo temporal después de la respuesta
-        @response.call_on_close
-        def remove_temp_file():
-            if os.path.exists(filepath):
-                os.remove(filepath)
-
+    return response
 
 
 # Vuelve los return JSONs que aceptan tildes
